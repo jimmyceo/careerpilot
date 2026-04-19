@@ -17,10 +17,24 @@ jobs:
       - name: Install Railway CLI
         run: npm install -g @railway/cli
 
+      - name: Check Railway Project
+        id: railway-check
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        run: |
+          # Try to link existing project
+          railway link --name "Hunt-X" 2>/dev/null || echo "Project not found, will create"
+          echo "project_exists=$(railway status 2>/dev/null && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
+
+      - name: Create Railway Project (if needed)
+        if: steps.railway-check.outputs.project_exists == 'false'
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        run: |
+          railway init --name "Hunt-X"
+
       - name: Deploy to Railway
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
         run: |
-          # Link project if exists, otherwise create
-          railway link --name "Hunt-X" --environment "production" || railway init --name "Hunt-X"
-          railway up
+          railway up --service "Hunt-X" --detach || railway up
