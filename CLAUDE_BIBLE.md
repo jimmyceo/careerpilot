@@ -6,7 +6,7 @@
 
 > **TO: Any Claude/AI Agent**  
 > **FROM: Tanvir (Founder)**  
-> **STATUS: Active Build — Day 1 of 3**
+> **STATUS: Active Build — Day 2 Complete, Ready for Day 3**
 
 **Your Job:** Continue building CareerPilot based on this spec.  
 **Timeline:** 3 days to MVP launch.  
@@ -38,16 +38,32 @@
 
 ## 2. MVP SCOPE (3 Days)
 
-### Day 1 — Backend + Foundation ✓ IN PROGRESS
+### Day 1 — Backend + Foundation ✅ COMPLETE
 - [x] FastAPI backend scaffold
-- [ ] Resume upload endpoint (PDF/DOC/TXT)
-- [ ] AI resume analysis (extract skills, experience, seniority)
-- [ ] CV generation endpoint (tailored to job description)
-- [ ] Stripe payment integration
-- [ ] Supabase database setup
+- [x] Resume upload endpoint (PDF/DOC/TXT)
+- [x] AI resume analysis (extract skills, experience, seniority)
+- [x] CV generation endpoint (tailored to job description)
+- [x] Database models (User, Resume, CV)
+- [x] SQLAlchemy integration
 
-### Day 2 — Frontend + Integration
-- [ ] Next.js frontend with Tailwind
+### Day 2 — Frontend + Payments ✅ COMPLETE
+- [x] Next.js frontend with Tailwind
+- [x] Landing page with pricing
+- [x] Upload page with drag-drop
+- [x] Dashboard with stats
+- [x] CV generation flow
+- [x] Stripe payment integration
+- [x] Payment webhook handler
+- [x] PDF generation service
+
+### Day 3 — Deploy + Launch ⏳ IN PROGRESS
+- [ ] Docker containerization
+- [ ] Vercel deployment (frontend)
+- [ ] VPS deployment (backend)
+- [ ] Environment variables setup
+- [ ] Stripe live mode
+- [ ] Launch marketing
+- [ ] Product Hunt submission
 - [ ] Landing page with payment CTA
 - [ ] Resume upload UI with drag-drop
 - [ ] Dashboard (view generated CVs, track applications)
