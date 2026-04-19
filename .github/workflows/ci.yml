@@ -40,7 +40,7 @@ jobs:
       - name: Install dependencies
         run: |
           cd frontend
-          npm ci
+          npm install  # Use install instead of ci (no package-lock.json yet)
       
       - name: Build test
         run: |
