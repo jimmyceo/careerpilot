@@ -20,4 +20,7 @@ jobs:
       - name: Deploy to Railway
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
-        run: railway up --service Hunt-X --environment production
+        run: |
+          # Link project if exists, otherwise create
+          railway link --name "Hunt-X" --environment "production" || railway init --name "Hunt-X"
+          railway up
