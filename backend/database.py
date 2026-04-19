@@ -7,6 +7,10 @@ import os
 # Use SQLite for Railway (simpler, no external DB needed)
 DATABASE_URL = os.getenv('DATABASE_URL', 'sqlite:///./hunt_x.db')
 
+# If Railway injected a PostgreSQL URL with localhost, force SQLite
+if 'localhost' in DATABASE_URL or 'postgres' in DATABASE_URL.lower():
+    DATABASE_URL = 'sqlite:///./hunt_x.db'
+
 # For SQLite, disable check_same_thread
 if DATABASE_URL.startswith('sqlite'):
     engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
@@ -18,7 +22,7 @@ Base = declarative_base()
 
 class User(Base):
     __tablename__ = 'users'
-    
+
     id = Column(String, primary_key=True)
     email = Column(String, unique=True, nullable=False)
     stripe_customer_id = Column(String)
@@ -29,19 +33,19 @@ class User(Base):
 
 class Resume(Base):
     __tablename__ = 'resumes'
-    
+
     id = Column(String, primary_key=True)
     user_id = Column(String, ForeignKey('users.id'))
     file_path = Column(String, nullable=False)
     file_name = Column(String, nullable=False)
     ai_analysis = Column(JSON)
     uploaded_at = Column(DateTime, default=datetime.utcnow)
-    
+
     user = relationship("User", back_populates="resumes")
 
 class CV(Base):
     __tablename__ = 'cvs'
-    
+
     id = Column(String, primary_key=True)
     user_id = Column(String, ForeignKey('users.id'))
     resume_id = Column(String, ForeignKey('resumes.id'))
