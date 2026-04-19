@@ -31,7 +31,7 @@ async def create_checkout(email: str, db: Session = Depends(get_db)):
                 'price_data': {
                     'currency': 'eur',
                     'product_data': {
-                        'name': 'CareerPilot Lifetime Access',
+                        'name': 'Hunt-X Lifetime Access',
                         'description': 'Unlimited CV generations, AI resume analysis, application tracker'
                     },
                     'unit_amount': 4900,  # €49.00 in cents

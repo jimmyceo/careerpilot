@@ -1,4 +1,4 @@
-# CareerPilot
+# Hunt-X
 ## AI-Powered Job Search Copilot
 
 Auto-find jobs, generate tailored CVs, track applications — all with AI.

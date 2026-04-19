@@ -1,61 +1,85 @@
-# CareerPilot Deployment Guide
+# Hunt-X Deployment Guide
 
 ## Frontend → Vercel
 
-1. Go to https://vercel.com
-2. Sign up/login with GitHub
+### Step 1: Go to Vercel
+1. Visit https://vercel.com
+2. Sign up / Login with GitHub
 3. Click "Add New Project"
-4. Import `jimmyceo/careerpilot` repo
-5. Configure:
-   - Framework Preset: Next.js
-   - Root Directory: `frontend`
-   - Build Command: `npm run build`
-   - Output Directory: `dist`
-6. Add Environment Variables:
-   - `NEXT_PUBLIC_API_URL` = Railway backend URL (get after Railway deploy)
-7. Click Deploy
 
-**Vercel will auto-deploy on every push to main.**
+### Step 2: Import Repo
+1. Select `jimmyceo/careerpilot` from the list
+2. Configure:
+   - **Framework Preset**: Next.js
+   - **Root Directory**: `frontend`
+   - **Build Command**: `npm run build`
+   - **Output Directory**: `dist`
+
+### Step 3: Environment Variables
+Add these (get backend URL after Railway deploy):
+```
+NEXT_PUBLIC_API_URL=https://your-railway-backend.up.railway.app
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_key
+```
+
+### Step 4: Deploy
+Click "Deploy" — done! Vercel gives you a URL instantly.
+
+---
 
 ## Backend → Railway
 
-1. Go to https://railway.app
-2. Sign up/login with GitHub
-3. Click "New Project" → "Deploy from GitHub repo"
-4. Select `jimmyceo/careerpilot`
-5. Railway auto-detects Dockerfile
-6. Add Environment Variables in Railway dashboard:
-   - `DATABASE_URL` = PostgreSQL connection string
-   - `STRIPE_SECRET_KEY` = your Stripe secret key
-   - `STRIPE_WEBHOOK_SECRET` = your Stripe webhook secret
-   - `OLLAMA_API_KEY` = from .env
-   - `OLLAMA_BASE_URL` = from .env
-7. Click Deploy
+### Step 1: Go to Railway
+1. Visit https://railway.app
+2. Sign up / Login with GitHub
+3. Click "New" → "Project" → "Deploy from GitHub repo"
 
-**Railway provides:**
-- Automatic HTTPS URL
-- PostgreSQL database (add in Railway dashboard)
-- Auto-deploy on push
+### Step 2: Configure
+1. Select `jimmyceo/careerpilot`
+2. Railway auto-detects Dockerfile
+3. Add PostgreSQL: Click "New" → "Database" → "Add PostgreSQL"
 
-## Post-Deploy Steps
+### Step 3: Environment Variables
+In Railway dashboard → Variables → "New Variable":
+```
+DATABASE_URL=${{Postgres.DATABASE_URL}}  (auto-filled after adding DB)
+STRIPE_SECRET_KEY=sk_test_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+OLLAMA_API_KEY=your_key
+OLLAMA_BASE_URL=https://api.ollama.ai/v1
+```
 
-1. **Update Frontend Env**: Add Railway backend URL to Vercel env vars
-2. **Stripe Webhook**: Configure webhook URL to `https://your-railway-url/api/payment/webhook`
-3. **Test**: Upload resume → Generate CV → Download PDF
-4. **Launch**: Share Vercel URL
+### Step 4: Deploy
+Railway auto-deploys. Copy the generated URL (e.g., `https://careerpilot-production.up.railway.app`)
 
-## URLs After Deploy
+---
 
-- **Frontend**: `https://careerpilot.vercel.app` (or your custom domain)
-- **Backend**: `https://careerpilot-production.up.railway.app` (auto-generated)
+## Post-Deploy
 
-## Troubleshooting
+### Update Frontend
+1. Go back to Vercel dashboard
+2. Project Settings → Environment Variables
+3. Add `NEXT_PUBLIC_API_URL=https://your-railway-url`
+4. Redeploy: Click "Redeploy"
 
-**CORS Issues:**
-Update `backend/main.py` CORS origins with your Vercel URL.
+### Stripe Webhook
+1. Stripe Dashboard → Developers → Webhooks
+2. Add endpoint: `https://your-railway-url/api/payment/webhook`
+3. Select events: `checkout.session.completed`
+4. Copy signing secret → add to Railway as `STRIPE_WEBHOOK_SECRET`
 
-**Build Failures:**
-Check Railway/Vercel logs in their dashboards.
+---
 
-**Database:**
-Railway provides managed PostgreSQL. Connection string auto-injected as `DATABASE_URL`.
+## Final URLs
+- **Frontend**: `https://careerpilot.vercel.app`
+- **Backend**: `https://careerpilot-production.up.railway.app`
+
+## Test Flow
+1. Open frontend URL
+2. Upload resume
+3. Enter job description
+4. Generate CV
+5. Download PDF
+
+Done! 🚀

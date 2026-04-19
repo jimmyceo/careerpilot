@@ -14,7 +14,7 @@ from company_config import kimi_query, notify
 from database import init_db, get_db, User, Resume, CV
 from services.pdf_generator import generate_pdf_from_html
 
-app = FastAPI(title="CareerPilot API", version="0.1.0")
+app = FastAPI(title="Hunt-X API", version="0.1.0")
 
 app.add_middleware(
     CORSMiddleware,

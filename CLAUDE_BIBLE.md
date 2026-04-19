@@ -1,4 +1,4 @@
-# CareerPilot — CLAUDE IMPLEMENTATION BIBLE
+# Hunt-X — CLAUDE IMPLEMENTATION BIBLE
 ## AI-Powered Job Search Copilot
 ### Version 0.1 | MVP Build (3 Days)
 
@@ -8,7 +8,7 @@
 > **FROM: Tanvir (Founder)**  
 > **STATUS: Active Build — Day 2 Complete, Ready for Day 3**
 
-**Your Job:** Continue building CareerPilot based on this spec.  
+**Your Job:** Continue building Hunt-X based on this spec.  
 **Timeline:** 3 days to MVP launch.  
 **Repo:** https://github.com/jimmyceo/careerpilot
 
@@ -16,7 +16,7 @@
 
 ## 1. WHAT WE'RE BUILDING
 
-**Product:** CareerPilot — An AI-powered job search copilot that helps job seekers:
+**Product:** Hunt-X — An AI-powered job search copilot that helps job seekers:
 - Upload and analyze their resume with AI
 - Generate tailored, ATS-optimized CVs for specific job descriptions
 - Track job applications in a dashboard

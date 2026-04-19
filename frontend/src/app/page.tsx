@@ -4,7 +4,7 @@ export default function Home() {
       {/* Hero */}
       <div className="container mx-auto px-4 py-20 text-center">
         <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-blue-400 to-emerald-400 bg-clip-text text-transparent">
-          CareerPilot
+          Hunt-X
         </h1>
         <p className="text-xl md:text-2xl text-slate-300 mb-4 max-w-2xl mx-auto">
           AI-Powered Job Search. Auto-find jobs, generate tailored CVs, land interviews.
