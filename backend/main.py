@@ -1,5 +1,6 @@
 from fastapi import FastAPI, UploadFile, File, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 import uvicorn
 import os
@@ -11,6 +12,7 @@ from datetime import datetime
 sys.path.append('/data/.openclaw/workspace/empire/agents')
 from company_config import kimi_query, notify
 from database import init_db, get_db, User, Resume, CV
+from services.pdf_generator import generate_pdf_from_html
 
 app = FastAPI(title="CareerPilot API", version="0.1.0")
 
@@ -24,6 +26,9 @@ app.add_middleware(
 
 UPLOAD_DIR = Path("/data/.openclaw/workspace/empire/careerpilot/uploads")
 UPLOAD_DIR.mkdir(exist_ok=True)
+
+PDF_DIR = Path("/data/.openclaw/workspace/empire/careerpilot/uploads/pdfs")
+PDF_DIR.mkdir(parents=True, exist_ok=True)
 
 def extract_text_from_file(file_path: str) -> str:
     """Extract text from PDF, DOC, DOCX, or TXT"""
@@ -170,6 +175,31 @@ Return ONLY the HTML content."""
         "cv_id": cv_id,
         "cv_html": cv_html
     }
+
+@app.get("/api/cv/{cv_id}/download")
+async def download_cv(cv_id: str, db: Session = Depends(get_db)):
+    """Download CV as PDF"""
+    cv = db.query(CV).filter(CV.id == cv_id).first()
+    if not cv:
+        raise HTTPException(404, "CV not found")
+    
+    # Generate PDF if not exists
+    if not cv.pdf_path or not Path(cv.pdf_path).exists():
+        pdf_path = generate_pdf_from_html(cv.cv_html, cv_id)
+        cv.pdf_path = pdf_path
+        db.commit()
+    
+    return FileResponse(
+        cv.pdf_path,
+        media_type="application/pdf",
+        filename=f"{cv.job_title.replace(' ', '_')}_CV.pdf"
+    )
+
+@app.get("/api/cv/user/{user_id}")
+async def get_user_cvs(user_id: str, db: Session = Depends(get_db)):
+    """Get all CVs for a user"""
+    cvs = db.query(CV).filter(CV.user_id == user_id).order_by(CV.created_at.desc()).all()
+    return [{"id": cv.id, "job_title": cv.job_title, "company": cv.company, "created_at": cv.created_at} for cv in cvs]
 
 @app.get("/api/health")
 async def health():
