@@ -4,9 +4,15 @@ from sqlalchemy.orm import sessionmaker, relationship
 from datetime import datetime
 import os
 
-DATABASE_URL = os.getenv('DATABASE_URL', 'postgresql://postgres:postgres@localhost:5432/careerpilot')
+# Use SQLite for Railway (simpler, no external DB needed)
+DATABASE_URL = os.getenv('DATABASE_URL', 'sqlite:///./hunt_x.db')
 
-engine = create_engine(DATABASE_URL)
+# For SQLite, disable check_same_thread
+if DATABASE_URL.startswith('sqlite'):
+    engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
+else:
+    engine = create_engine(DATABASE_URL)
+
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
