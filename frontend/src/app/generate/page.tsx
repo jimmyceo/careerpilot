@@ -10,7 +10,7 @@ export default function GeneratePage() {
   const [company, setCompany] = useState('')
   const [jobDescription, setJobDescription] = useState('')
   const [generating, setGenerating] = useState(false)
-  const [result, setResult] = useState(null)
+  const [result, setResult] = useState<{cv_id: string; cv_html: string} | null>(null)
 
   const handleGenerate = async () => {
     setGenerating(true)
