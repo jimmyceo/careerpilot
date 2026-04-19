@@ -22,11 +22,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Install Playwright browsers
 RUN playwright install chromium
 
-# Copy app
-COPY backend/ ./backend/
-COPY database.py ./
-
-WORKDIR /app/backend
+# Copy backend code
+COPY backend/ ./
 
 EXPOSE 8000
 
