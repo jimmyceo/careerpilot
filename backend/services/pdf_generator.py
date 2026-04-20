@@ -5,8 +5,15 @@ from pathlib import Path
 import uuid
 import os
 
-UPLOAD_DIR = Path(os.getenv('PDF_DIR', '/app/uploads/pdfs'))
-UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+# Use a directory that's writable
+UPLOAD_DIR = Path(os.getenv('PDF_DIR', './uploads/pdfs'))
+try:
+    UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+except OSError:
+    # Fallback to temp directory if no write permission
+    import tempfile
+    UPLOAD_DIR = Path(tempfile.gettempdir()) / 'hunt_x_uploads' / 'pdfs'
+    UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
 def generate_pdf_from_html(cv_html: str, cv_id: str) -> str:
     """Generate PDF from HTML CV - simplified version"""

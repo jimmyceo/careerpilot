@@ -59,6 +59,14 @@ class CV(Base):
 User.resumes = relationship("Resume", back_populates="user")
 
 def init_db():
+    # Import subscription models here to avoid circular imports
+    from models.subscription import (
+        SubscriptionPlan, UserSubscription, SubscriptionEvent,
+        CreditBalance, UsageLog
+    )
+    # Add relationship after models are imported
+    User.subscription = relationship("UserSubscription", back_populates="user", uselist=False)
+
     Base.metadata.create_all(bind=engine)
 
 def get_db():
