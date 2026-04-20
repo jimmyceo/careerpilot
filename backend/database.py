@@ -4,8 +4,14 @@ from sqlalchemy.orm import sessionmaker, relationship
 from datetime import datetime
 import os
 
-# Use SQLite for Railway (simpler, no external DB needed)
-DATABASE_URL = os.getenv('DATABASE_URL', 'sqlite:///./hunt_x.db')
+# Force SQLite for Railway (simpler, no external DB needed)
+# Railway may set DATABASE_URL to PostgreSQL, but we ignore it
+if os.getenv('RAILWAY_ENVIRONMENT') or os.getenv('RAILWAY_SERVICE_ID'):
+    DATABASE_URL = 'sqlite:///./hunt_x.db'
+else:
+    DATABASE_URL = os.getenv('DATABASE_URL', 'sqlite:///./hunt_x.db')
+
+print(f"Using database: {DATABASE_URL[:20]}...")
 
 # For SQLite, disable check_same_thread
 if DATABASE_URL.startswith('sqlite'):
