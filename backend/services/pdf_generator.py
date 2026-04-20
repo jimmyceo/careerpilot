@@ -3,17 +3,18 @@
 
 from pathlib import Path
 import uuid
+import os
 
-UPLOAD_DIR = Path("/data/.openclaw/workspace/empire/careerpilot/uploads/pdfs")
+UPLOAD_DIR = Path(os.getenv('PDF_DIR', '/app/uploads/pdfs'))
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
 def generate_pdf_from_html(cv_html: str, cv_id: str) -> str:
     """Generate PDF from HTML CV - simplified version"""
-    
+
     # For now, save HTML and return path
     # PDF conversion can be done client-side with browser print
     html_path = UPLOAD_DIR / f"{cv_id}.html"
-    
+
     full_html = f"""
     <!DOCTYPE html>
     <html>
@@ -40,8 +41,8 @@ def generate_pdf_from_html(cv_html: str, cv_id: str) -> str:
     </body>
     </html>
     """
-    
+
     with open(html_path, "w") as f:
         f.write(full_html)
-    
+
     return str(html_path)

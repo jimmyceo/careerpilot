@@ -22,10 +22,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-UPLOAD_DIR = Path("/data/.openclaw/workspace/empire/careerpilot/uploads")
+UPLOAD_DIR = Path(os.getenv('UPLOAD_DIR', '/app/uploads'))
 UPLOAD_DIR.mkdir(exist_ok=True)
 
-PDF_DIR = Path("/data/.openclaw/workspace/empire/careerpilot/uploads/pdfs")
+PDF_DIR = Path(os.getenv('PDF_DIR', '/app/uploads/pdfs'))
 PDF_DIR.mkdir(parents=True, exist_ok=True)
 
 def extract_text_from_file(file_path: str) -> str:
