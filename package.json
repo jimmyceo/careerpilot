@@ -1,0 +1,13 @@
+{
+  "name": "hunt-x",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "next": "14.0.4"
+  },
+  "scripts": {
+    "build": "cd frontend && npm install && npm run build",
+    "dev": "cd frontend && npm run dev",
+    "start": "cd frontend && npm run start"
+  }
+}
