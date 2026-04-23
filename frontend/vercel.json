@@ -1,0 +1,8 @@
+{
+  "framework": "nextjs",
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "env": {
+    "NEXT_PUBLIC_API_URL": "https://hunt-x-production-2954.up.railway.app"
+  }
+}
