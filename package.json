@@ -1,6 +1,9 @@
 {
   "name": "hunt-x",
   "private": true,
+  "dependencies": {
+    "next": "14.0.4"
+  },
   "scripts": {
     "build": "cd frontend && npm install && npm run build",
     "dev": "cd frontend && npm run dev",
