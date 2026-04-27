@@ -27,4 +27,4 @@ jobs:
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
         run: |
           cd frontend
-          vercel --token "$VERCEL_TOKEN" --prod --yes
+          vercel --token "$VERCEL_TOKEN" --project hunt-x-app --prod --yes
