@@ -1,3 +1,5 @@
+import './globals.css'
+
 export const metadata = {
   title: 'Hunt-X - AI-Powered Job Search',
   description: 'Upload your resume. Generate tailored CVs for every job. Track applications. Land interviews faster.',
