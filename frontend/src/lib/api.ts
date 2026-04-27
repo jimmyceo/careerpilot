@@ -1,4 +1,11 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+// Use production backend unless running locally
+const isLocal = typeof window !== 'undefined' && (
+  window.location.hostname === 'localhost' ||
+  window.location.hostname === '127.0.0.1'
+);
+const API_BASE_URL = isLocal
+  ? (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000')
+  : (process.env.NEXT_PUBLIC_API_URL || 'https://hunt-x-production-2954.up.railway.app');
 
 export const setAuthToken = (token: string | null) => {
   if (typeof window !== 'undefined' && token) localStorage.setItem('token', token);
