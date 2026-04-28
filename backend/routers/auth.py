@@ -7,6 +7,8 @@ from fastapi.security import HTTPBearer
 from pydantic import BaseModel, EmailStr
 from sqlalchemy.orm import Session
 from typing import Optional
+from datetime import datetime, timedelta
+import secrets
 
 from models import get_db, User
 from dependencies import (
@@ -43,6 +45,20 @@ class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
     user: UserResponse
+
+
+class ForgotPasswordRequest(BaseModel):
+    email: EmailStr
+
+
+class ResetPasswordRequest(BaseModel):
+    token: str
+    new_password: str
+
+
+class PasswordResetResponse(BaseModel):
+    success: bool
+    message: str
 
 
 @router.post("/register", response_model=TokenResponse)
@@ -149,6 +165,99 @@ async def get_me(
         name=current_user.name,
         tier=current_user.tier,
         jobs_remaining=current_user.jobs_remaining
+    )
+
+
+@router.put("/me", response_model=UserResponse)
+async def update_me(
+    name: Optional[str] = None,
+    phone: Optional[str] = None,
+    location: Optional[str] = None,
+    linkedin_url: Optional[str] = None,
+    github_url: Optional[str] = None,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Update current user profile"""
+    if name is not None:
+        current_user.name = name
+    if phone is not None:
+        current_user.phone = phone
+    if location is not None:
+        current_user.location = location
+    if linkedin_url is not None:
+        current_user.linkedin_url = linkedin_url
+    if github_url is not None:
+        current_user.github_url = github_url
+    db.commit()
+    db.refresh(current_user)
+    return UserResponse(
+        id=str(current_user.id),
+        email=current_user.email,
+        name=current_user.name,
+        tier=current_user.tier,
+        jobs_remaining=current_user.jobs_remaining
+    )
+
+
+@router.post("/forgot-password", response_model=PasswordResetResponse)
+async def forgot_password(
+    request: ForgotPasswordRequest,
+    db: Session = Depends(get_db)
+):
+    """Request password reset token"""
+    user = db.query(User).filter(User.email == request.email).first()
+    if not user:
+        # Don't reveal if email exists
+        return PasswordResetResponse(
+            success=True,
+            message="If an account exists, a reset link has been sent."
+        )
+
+    # Generate secure token
+    token = secrets.token_urlsafe(32)
+    user.reset_token = token
+    user.reset_token_expires = datetime.utcnow() + timedelta(hours=24)
+    db.commit()
+
+    # In production, send email here
+    # For now, return the token in the message for testing
+    print(f"Password reset token for {user.email}: {token}")
+
+    return PasswordResetResponse(
+        success=True,
+        message="If an account exists, a reset link has been sent."
+    )
+
+
+@router.post("/reset-password", response_model=PasswordResetResponse)
+async def reset_password(
+    request: ResetPasswordRequest,
+    db: Session = Depends(get_db)
+):
+    """Reset password with token"""
+    user = db.query(User).filter(
+        User.reset_token == request.token,
+        User.reset_token_expires > datetime.utcnow()
+    ).first()
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid or expired reset token"
+        )
+
+    # Update password
+    password_bytes = request.new_password.encode('utf-8')[:72]
+    truncated_password = password_bytes.decode('utf-8', errors='ignore')
+    user.password_hash = get_password_hash(truncated_password)
+    user.reset_token = None
+    user.reset_token_expires = None
+    db.commit()
+
+    return PasswordResetResponse(
+        success=True,
+        message="Password has been reset successfully."
     )
 
 

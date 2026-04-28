@@ -241,6 +241,25 @@ export const apiClient = {
     return handleResponse(res);
   },
 
+  // ============ PASSWORD RESET ============
+  async forgotPassword(email: string) {
+    const res = await fetchWithTimeout(`${API_BASE_URL}/api/auth/forgot-password`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
+    });
+    return handleResponse(res);
+  },
+
+  async resetPassword(token: string, newPassword: string) {
+    const res = await fetchWithTimeout(`${API_BASE_URL}/api/auth/reset-password`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token, new_password: newPassword }),
+    });
+    return handleResponse(res);
+  },
+
   // ============ LEGACY COMPATIBILITY ============
   async checkPaymentStatus(email: string) {
     const res = await fetchWithTimeout(`${API_BASE_URL}/api/payment/v2/status/${email}`, {

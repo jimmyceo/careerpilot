@@ -32,6 +32,10 @@ class User(BaseModel):
     jobs_remaining = Column(Integer, default=5)
     jobs_reset_date = Column(DateTime)
 
+    # Password reset
+    reset_token = Column(String(255), unique=True, nullable=True, index=True)
+    reset_token_expires = Column(DateTime)
+
     # Relationships
     resumes = relationship("Resume", back_populates="user", cascade="all, delete-orphan")
     evaluations = relationship("Evaluation", back_populates="user")
