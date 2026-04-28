@@ -1,4 +1,15 @@
 import Link from 'next/link'
+import {
+  FileSearch,
+  FilePlus,
+  Search,
+  LayoutDashboard,
+  MessagesSquare,
+  Mail,
+  ArrowRight,
+  Star,
+  Quote,
+} from 'lucide-react'
 
 export default function Home() {
   return (
@@ -12,7 +23,7 @@ export default function Home() {
           <div className="hidden md:flex items-center gap-8 text-sm text-[#64748d]">
             <a href="#features" className="hover:text-[#061b31] transition">Features</a>
             <a href="#how-it-works" className="hover:text-[#061b31] transition">How It Works</a>
-            <a href="#pricing" className="hover:text-[#061b31] transition">Pricing</a>
+            <a href="/pricing" className="hover:text-[#061b31] transition">Pricing</a>
             <a href="#faq" className="hover:text-[#061b31] transition">FAQ</a>
           </div>
           <div className="flex items-center gap-3">
@@ -53,7 +64,7 @@ export default function Home() {
             </Link>
           </div>
 
-          {/* Dashboard mockup placeholder */}
+          {/* Dashboard mockup */}
           <div className="max-w-4xl mx-auto rounded-xl border border-[#e5edf5] bg-white shadow-[0_30px_45px_-30px_rgba(50,50,93,0.25),0_18px_36px_-18px_rgba(0,0,0,0.1)] overflow-hidden">
             <div className="p-8 md:p-12 bg-[#f6f9fc]">
               <div className="grid grid-cols-3 gap-4 mb-8">
@@ -114,15 +125,17 @@ export default function Home() {
           </div>
           <div className="grid md:grid-cols-3 gap-6">
             {[
-              { icon: '📝', title: 'AI Resume Analysis', desc: 'Upload your resume and get instant AI feedback on structure, keywords, and ATS compatibility.' },
-              { icon: '🎯', title: 'Tailored CV Generation', desc: 'Generate ATS-optimized CVs tailored to any job description in seconds.' },
-              { icon: '🔍', title: 'Smart Job Discovery', desc: 'AI scans LinkedIn, Indeed, and 50+ portals to find jobs that actually match your profile.' },
-              { icon: '📊', title: 'Application Tracker', desc: 'Never lose track of an application. Visual pipeline from applied to offer.' },
-              { icon: '💬', title: 'Interview Prep', desc: 'AI-generated interview questions and answers based on your target role.' },
-              { icon: '✉️', title: 'Cover Letters', desc: 'Personalized cover letters that match the job and highlight your strengths.' },
+              { icon: FileSearch, title: 'AI Resume Analysis', desc: 'Upload your resume and get instant AI feedback on structure, keywords, and ATS compatibility.' },
+              { icon: FilePlus, title: 'Tailored CV Generation', desc: 'Generate ATS-optimized CVs tailored to any job description in seconds.' },
+              { icon: Search, title: 'Smart Job Discovery', desc: 'AI scans LinkedIn, Indeed, and 50+ portals to find jobs that actually match your profile.' },
+              { icon: LayoutDashboard, title: 'Application Tracker', desc: 'Never lose track of an application. Visual pipeline from applied to offer.' },
+              { icon: MessagesSquare, title: 'Interview Prep', desc: 'AI-generated interview questions and answers based on your target role.' },
+              { icon: Mail, title: 'Cover Letters', desc: 'Personalized cover letters that match the job and highlight your strengths.' },
             ].map((feature) => (
               <div key={feature.title} className="p-6 bg-white rounded-lg border border-[#e5edf5] shadow-[0_15px_35px_rgba(23,23,23,0.08)] hover:shadow-[0_20px_40px_rgba(23,23,23,0.12)] transition">
-                <div className="text-2xl mb-3">{feature.icon}</div>
+                <div className="w-10 h-10 rounded-lg bg-[rgba(83,58,253,0.08)] flex items-center justify-center mb-3">
+                  <feature.icon className="w-5 h-5 text-[#533afd]" />
+                </div>
                 <h3 className="text-lg font-light text-[#061b31] mb-2">{feature.title}</h3>
                 <p className="text-sm text-[#64748d] leading-relaxed">{feature.desc}</p>
               </div>
@@ -140,7 +153,7 @@ export default function Home() {
             {[
               { step: '1', title: 'Upload', desc: 'Upload your resume in PDF, DOCX, or TXT format.' },
               { step: '2', title: 'Analyze', desc: 'Our AI analyzes your skills, experience, and gaps.' },
-              { step: '3', title: 'Apply & Track', desc: 'Generate tailored CVs and track applications.' },
+              { step: '3', title: 'Apply &amp; Track', desc: 'Generate tailored CVs and track applications.' },
             ].map((item) => (
               <div key={item.step} className="relative">
                 <div className="w-12 h-12 mx-auto mb-4 rounded-full border-2 border-dashed border-[#b9b9f9] flex items-center justify-center text-[#533afd] font-light text-lg">
@@ -148,6 +161,52 @@ export default function Home() {
                 </div>
                 <h3 className="text-xl font-light text-[#061b31] mb-2">{item.title}</h3>
                 <p className="text-sm text-[#64748d]">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials */}
+      <section className="py-20">
+        <div className="max-w-[1080px] mx-auto px-4">
+          <div className="text-center mb-12">
+            <span className="text-xs text-[#64748d] uppercase tracking-wider">Testimonials</span>
+            <h2 className="text-3xl font-light mt-2 text-[#061b31]">Loved by Job Seekers</h2>
+          </div>
+          <div className="grid md:grid-cols-3 gap-6">
+            {[
+              {
+                name: 'Sarah K.',
+                role: 'Product Designer',
+                quote: 'Hunt-X helped me land 3 interviews in my first week. The AI-generated CVs are incredible.',
+                rating: 5,
+              },
+              {
+                name: 'Michael R.',
+                role: 'Senior Frontend Engineer',
+                quote: 'I went from 0 callbacks to 5 interviews in two weeks. The tailored CVs really make a difference.',
+                rating: 5,
+              },
+              {
+                name: 'Emily T.',
+                role: 'Data Scientist',
+                quote: 'The interview prep feature saved me. I walked into every interview knowing exactly what to expect.',
+                rating: 5,
+              },
+            ].map((t) => (
+              <div key={t.name} className="p-6 bg-white rounded-xl border border-[#e5edf5] shadow-[0_15px_35px_rgba(23,23,23,0.08)]">
+                <Quote className="w-8 h-8 text-[#533afd] mb-4 opacity-20" />
+                <p className="text-[#061b31] mb-4 leading-relaxed">"{t.quote}"</p>
+                <div className="flex items-center gap-1 mb-3">
+                  {Array.from({ length: t.rating }).map((_, i) => (
+                    <Star key={i} className="w-4 h-4 text-[#9b6829] fill-[#9b6829]" />
+                  ))}
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-[#061b31]">{t.name}</p>
+                  <p className="text-xs text-[#64748d]">{t.role}</p>
+                </div>
               </div>
             ))}
           </div>
@@ -192,7 +251,35 @@ export default function Home() {
           <div className="text-center mt-6">
             <Link href="/pricing" className="text-sm text-[#533afd] hover:underline">
               View Full Pricing
+              <ArrowRight className="w-3.5 h-3.5 inline ml-0.5" />
             </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section id="faq" className="py-20 bg-[#f6f9fc]">
+        <div className="max-w-[1080px] mx-auto px-4">
+          <div className="text-center mb-12">
+            <span className="text-xs text-[#64748d] uppercase tracking-wider">FAQ</span>
+            <h2 className="text-3xl font-light mt-2 text-[#061b31]">Frequently Asked Questions</h2>
+          </div>
+          <div className="max-w-2xl mx-auto space-y-4">
+            {[
+              { q: 'Can I cancel anytime?', a: 'Yes. You can cancel your subscription at any time from your account settings. Your access continues until the end of your billing period.' },
+              { q: 'What happens when I hit my free limit?', a: 'You will be prompted to upgrade to a paid plan. Your existing data (resumes, evaluations) remains accessible even on the free tier.' },
+              { q: 'Is there a free trial for paid plans?', a: 'We offer a generous free tier so you can try core features before upgrading. There is no separate trial period for paid plans.' },
+              { q: 'Can I change plans later?', a: 'Absolutely. You can upgrade or downgrade at any time. Upgrades take effect immediately; downgrades apply at the next billing cycle.' },
+              { q: 'Do you offer refunds?', a: 'If you are not satisfied, contact us within 14 days of your first paid subscription for a full refund.' },
+            ].map((faq) => (
+              <details key={faq.q} className="group border-b border-[#e5edf5] pb-4 bg-white rounded-lg px-6 py-2">
+                <summary className="flex items-center justify-between cursor-pointer list-none py-2">
+                  <span className="text-base font-normal text-[#061b31]">{faq.q}</span>
+                  <span className="text-[#64748d] group-open:rotate-180 transition">&#9662;</span>
+                </summary>
+                <p className="text-base text-[#64748d] pt-2 leading-relaxed">{faq.a}</p>
+              </details>
+            ))}
           </div>
         </div>
       </section>
@@ -221,7 +308,7 @@ export default function Home() {
               <h4 className="text-sm font-normal text-[#061b31] mb-3">Product</h4>
               <ul className="space-y-2 text-sm text-[#64748d]">
                 <li><a href="#features" className="hover:text-[#061b31]">Features</a></li>
-                <li><a href="#pricing" className="hover:text-[#061b31]">Pricing</a></li>
+                <li><Link href="/pricing" className="hover:text-[#061b31]">Pricing</Link></li>
                 <li><Link href="/upload" className="hover:text-[#061b31]">Upload Resume</Link></li>
               </ul>
             </div>
