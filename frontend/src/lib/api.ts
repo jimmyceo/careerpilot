@@ -7,6 +7,23 @@ const API_BASE_URL = isLocal
   ? (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000')
   : (process.env.NEXT_PUBLIC_API_URL || 'https://hunt-x-production-2954.up.railway.app');
 
+function extractError(data: any): string {
+  if (typeof data.detail === 'string') return data.detail;
+  if (Array.isArray(data.detail)) {
+    return data.detail.map((e: any) => e.msg || String(e)).join('; ');
+  }
+  if (data.message) return data.message;
+  return JSON.stringify(data);
+}
+
+async function handleResponse(res: Response) {
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(extractError(data) || `HTTP ${res.status}`);
+  }
+  return data;
+}
+
 export const setAuthToken = (token: string | null) => {
   if (typeof window !== 'undefined' && token) localStorage.setItem('token', token);
   else if (typeof window !== 'undefined') localStorage.removeItem('token');
@@ -40,7 +57,7 @@ export const apiClient = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password, name }),
     });
-    const data = await res.json();
+    const data = await handleResponse(res);
     if (data.access_token) setAuthToken(data.access_token);
     return data;
   },
@@ -51,7 +68,7 @@ export const apiClient = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password }),
     });
-    const data = await res.json();
+    const data = await handleResponse(res);
     if (data.access_token) setAuthToken(data.access_token);
     return data;
   },
@@ -60,7 +77,7 @@ export const apiClient = {
     const res = await fetch(`${API_BASE_URL}/api/auth/me`, {
       headers: authHeaders(),
     });
-    return res.json();
+    return handleResponse(res);
   },
 
   // ============ RESUME ============

@@ -29,8 +29,8 @@ export default function AuthPage() {
       if (data.access_token) {
         setAuthToken(data.access_token);
         router.push('/dashboard');
-      } else if (data.detail) {
-        setError(data.detail);
+      } else {
+        setError('Unexpected response from server');
       }
     } catch (err: any) {
       setError(err.message || 'Something went wrong');
