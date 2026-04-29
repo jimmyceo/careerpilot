@@ -198,6 +198,14 @@ export const apiClient = {
     return handleResponse(res);
   },
 
+  async deleteEvaluation(evaluationId: string) {
+    const res = await fetchWithTimeout(`${API_BASE_URL}/api/evaluate/${evaluationId}`, {
+      method: 'DELETE',
+      headers: authHeaders(),
+    });
+    return handleResponse(res);
+  },
+
   // ============ CV ============
   async generateCV(evaluationId: string, template?: string) {
     const res = await fetchWithTimeout(`${API_BASE_URL}/api/cv/generate`, {
@@ -220,6 +228,14 @@ export const apiClient = {
 
   async listCVs() {
     const res = await fetchWithTimeout(`${API_BASE_URL}/api/cv/`, {
+      headers: authHeaders(),
+    });
+    return handleResponse(res);
+  },
+
+  async deleteCV(cvId: string) {
+    const res = await fetchWithTimeout(`${API_BASE_URL}/api/cv/${cvId}`, {
+      method: 'DELETE',
       headers: authHeaders(),
     });
     return handleResponse(res);
@@ -344,6 +360,14 @@ export const apiClient = {
     return handleResponse(res);
   },
 
+  async deleteInterviewPrep(prepId: string) {
+    const res = await fetchWithTimeout(`${API_BASE_URL}/api/interview/${prepId}`, {
+      method: 'DELETE',
+      headers: authHeaders(),
+    });
+    return handleResponse(res);
+  },
+
   // ============ APPLICATIONS ============
   async listApplications() {
     const res = await fetchWithTimeout(`${API_BASE_URL}/api/applications/`, {
@@ -401,6 +425,14 @@ export const apiClient = {
 
   async downloadCoverLetter(coverId: string) {
     window.open(`${API_BASE_URL}/api/cover-letter/${coverId}/download`, '_blank');
+  },
+
+  async deleteCoverLetter(coverId: string) {
+    const res = await fetchWithTimeout(`${API_BASE_URL}/api/cover-letter/${coverId}`, {
+      method: 'DELETE',
+      headers: authHeaders(),
+    });
+    return handleResponse(res);
   },
 
   // ============ JOBS ============

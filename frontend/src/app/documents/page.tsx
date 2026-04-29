@@ -112,10 +112,19 @@ export default function DocumentsPage() {
   const handleDelete = async (evId: string) => {
     if (!confirm('Delete all documents for this job?')) return;
     setDeleting(evId);
+    setError('');
     try {
-      // Note: actual delete endpoints would need to be added to backend
-      // For now, we just remove from local state
-      setGroups((prev) => prev.filter((g) => g.evaluationId !== evId));
+      const group = groups.find((g) => g.evaluationId === evId);
+      if (!group) return;
+
+      const deletes: Promise<any>[] = [];
+      deletes.push(apiClient.deleteEvaluation(evId));
+      if (group.cvId) deletes.push(apiClient.deleteCV(group.cvId));
+      if (group.coverLetterId) deletes.push(apiClient.deleteCoverLetter(group.coverLetterId));
+      if (group.interviewPrepId) deletes.push(apiClient.deleteInterviewPrep(group.interviewPrepId));
+
+      await Promise.all(deletes);
+      await loadDocuments();
     } catch (err: any) {
       setError(err.message || 'Failed to delete');
     } finally {
