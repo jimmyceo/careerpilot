@@ -195,48 +195,55 @@ export const apiClient = {
     return handleResponse(res);
   },
 
-  async getCurrentSubscription(userId: string) {
-    const res = await fetchWithTimeout(`${API_BASE_URL}/api/subscriptions/current?user_id=${userId}`);
+  async getCurrentSubscription() {
+    const res = await fetchWithTimeout(`${API_BASE_URL}/api/subscriptions/current`, {
+      headers: authHeaders(),
+    });
     return handleResponse(res);
   },
 
-  async getUsageSummary(userId: string) {
-    const res = await fetchWithTimeout(`${API_BASE_URL}/api/subscriptions/usage?user_id=${userId}`);
+  async getUsageSummary() {
+    const res = await fetchWithTimeout(`${API_BASE_URL}/api/subscriptions/usage`, {
+      headers: authHeaders(),
+    });
     return handleResponse(res);
   },
 
-  async checkFeature(userId: string, feature: string) {
+  async checkFeature(feature: string) {
     const res = await fetchWithTimeout(`${API_BASE_URL}/api/subscriptions/check-feature`, {
       method: 'POST',
       headers: jsonHeaders(),
-      body: JSON.stringify({ user_id: userId, feature }),
+      body: JSON.stringify({ feature }),
     });
     return handleResponse(res);
   },
 
-  async consumeFeature(userId: string, feature: string, amount: number = 1) {
+  async consumeFeature(feature: string, amount: number = 1) {
     const res = await fetchWithTimeout(`${API_BASE_URL}/api/subscriptions/consume-feature`, {
       method: 'POST',
       headers: jsonHeaders(),
-      body: JSON.stringify({ user_id: userId, feature, amount }),
+      body: JSON.stringify({ feature, amount }),
     });
     return handleResponse(res);
   },
 
-  async createCheckout(tier: string, userId: string, email: string) {
+  async createCheckout(tier: string) {
     const res = await fetchWithTimeout(`${API_BASE_URL}/api/subscriptions/create-checkout`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ tier, user_id: userId, email }),
+      headers: jsonHeaders(),
+      body: JSON.stringify({ tier }),
     });
     return handleResponse(res);
   },
 
-  async cancelSubscription(userId: string, atPeriodEnd: boolean = true) {
+  async cancelSubscription(atPeriodEnd: boolean = true) {
     const res = await fetchWithTimeout(`${API_BASE_URL}/api/subscriptions/cancel`, {
       method: 'POST',
       headers: jsonHeaders(),
-      body: JSON.stringify({ user_id: userId, at_period_end: atPeriodEnd }),
+      body: JSON.stringify({ at_period_end: atPeriodEnd }),
+    });
+    return handleResponse(res);
+  },
     });
     return handleResponse(res);
   },

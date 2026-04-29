@@ -1,10 +1,9 @@
 """
 API routes for subscription management
 """
-from fastapi import APIRouter, Depends, HTTPException, Request, Header
+from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
-from typing import Optional
 from pydantic import BaseModel, Field
 import os
 import stripe
@@ -12,6 +11,8 @@ import stripe
 from database import get_db
 from services.subscription_service import SubscriptionService
 from models.enums import SubscriptionTier, Feature
+from dependencies import get_current_user
+from models import User
 
 router = APIRouter(prefix="/api/subscriptions", tags=["subscriptions"])
 
@@ -24,28 +25,19 @@ STRIPE_WEBHOOK_SECRET = os.getenv('STRIPE_WEBHOOK_SECRET', '')
 
 class CreateSubscriptionRequest(BaseModel):
     tier: str = Field(..., description="Subscription tier: free, starter, pro, team")
-    user_id: str = Field(..., description="User ID")
-    email: str = Field(..., description="User email")
 
 
 class CancelSubscriptionRequest(BaseModel):
-    user_id: str = Field(..., description="User ID")
     at_period_end: bool = Field(True, description="Cancel at period end")
 
 
 class CheckFeatureRequest(BaseModel):
-    user_id: str = Field(..., description="User ID")
     feature: str = Field(..., description="Feature to check")
 
 
 class ConsumeFeatureRequest(BaseModel):
-    user_id: str = Field(..., description="User ID")
     feature: str = Field(..., description="Feature to consume")
     amount: int = Field(1, description="Amount to consume")
-
-
-class StripeWebhookRequest(BaseModel):
-    pass  # Raw body handled directly
 
 
 # ============ Routes ============
@@ -66,13 +58,13 @@ async def get_subscription_plans(db: Session = Depends(get_db)):
 
 @router.get("/current")
 async def get_current_subscription(
-    user_id: str,
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Get user's current subscription"""
     try:
         service = SubscriptionService(db)
-        subscription = service.get_or_create_subscription(user_id)
+        subscription = service.get_or_create_subscription(str(current_user.id))
         return {
             "status": "success",
             "subscription": subscription
@@ -84,6 +76,7 @@ async def get_current_subscription(
 @router.post("/create-checkout")
 async def create_checkout_session(
     request: CreateSubscriptionRequest,
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Create Stripe Checkout session for subscription"""
@@ -94,7 +87,7 @@ async def create_checkout_session(
         tier = request.tier.lower()
         if tier == "free":
             # Just create free subscription directly
-            subscription = service.get_or_create_subscription(request.user_id)
+            subscription = service.get_or_create_subscription(str(current_user.id))
             return {
                 "status": "success",
                 "checkout_url": None,
@@ -126,9 +119,9 @@ async def create_checkout_session(
             mode='subscription',
             success_url=os.getenv('STRIPE_SUCCESS_URL', 'http://localhost:3000/dashboard?payment=success'),
             cancel_url=os.getenv('STRIPE_CANCEL_URL', 'http://localhost:3000/pricing?cancelled'),
-            customer_email=request.email,
+            customer_email=current_user.email,
             metadata={
-                'user_id': request.user_id,
+                'user_id': str(current_user.id),
                 'plan_id': plan.id,
                 'tier': tier
             }
@@ -149,13 +142,14 @@ async def create_checkout_session(
 @router.post("/cancel")
 async def cancel_subscription(
     request: CancelSubscriptionRequest,
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Cancel user's subscription"""
     try:
         service = SubscriptionService(db)
         subscription = service.cancel_subscription(
-            request.user_id,
+            str(current_user.id),
             request.at_period_end
         )
         return {
@@ -170,13 +164,13 @@ async def cancel_subscription(
 
 @router.get("/usage")
 async def get_usage_summary(
-    user_id: str,
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Get credit usage summary"""
     try:
         service = SubscriptionService(db)
-        summary = service.get_credit_summary(user_id)
+        summary = service.get_credit_summary(str(current_user.id))
         return {
             "status": "success",
             "usage": summary
@@ -188,6 +182,7 @@ async def get_usage_summary(
 @router.post("/check-feature")
 async def check_feature_access(
     request: CheckFeatureRequest,
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Check if user has access to a feature"""
@@ -200,7 +195,7 @@ async def check_feature_access(
         except ValueError:
             raise HTTPException(status_code=400, detail=f"Invalid feature: {request.feature}")
 
-        access = service.check_feature_access(request.user_id, feature)
+        access = service.check_feature_access(str(current_user.id), feature)
         return {
             "status": "success",
             "access": access
@@ -212,6 +207,7 @@ async def check_feature_access(
 @router.post("/consume-feature")
 async def consume_feature(
     request: ConsumeFeatureRequest,
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Consume credits for a feature"""
@@ -225,7 +221,7 @@ async def consume_feature(
             raise HTTPException(status_code=400, detail=f"Invalid feature: {request.feature}")
 
         result = service.consume_feature(
-            request.user_id,
+            str(current_user.id),
             feature,
             request.amount
         )
@@ -253,7 +249,7 @@ async def stripe_webhook(
     request: Request,
     db: Session = Depends(get_db)
 ):
-    """Handle Stripe webhooks"""
+    """Handle Stripe webhooks (public — called by Stripe)"""
     payload = await request.body()
     sig_header = request.headers.get('stripe-signature')
 

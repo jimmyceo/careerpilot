@@ -57,16 +57,13 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
 
   const refreshUsage = async () => {
     try {
-      const user = await apiClient.getCurrentUser();
-      if (user?.id) {
-        const usageData = await apiClient.getUsageSummary(user.id);
-        if (usageData.status === 'success' && usageData.usage) {
-          setUsage(usageData.usage);
-        }
-        const subData = await apiClient.getCurrentSubscription(user.id);
-        if (subData.status === 'success' && subData.subscription) {
-          setSubscription(subData.subscription);
-        }
+      const usageData = await apiClient.getUsageSummary();
+      if (usageData.status === 'success' && usageData.usage) {
+        setUsage(usageData.usage);
+      }
+      const subData = await apiClient.getCurrentSubscription();
+      if (subData.status === 'success' && subData.subscription) {
+        setSubscription(subData.subscription);
       }
     } catch (e) {
       console.error('Failed to load subscription:', e);
