@@ -330,6 +330,40 @@ export const apiClient = {
     return handleResponse(res);
   },
 
+  // ============ APPLICATIONS ============
+  async listApplications() {
+    const res = await fetchWithTimeout(`${API_BASE_URL}/api/applications/`, {
+      headers: authHeaders(),
+    });
+    return handleResponse(res);
+  },
+
+  async createApplication(data: { company: string; role: string; stage?: string; date?: string; notes?: string; url?: string; salary?: string; location?: string }) {
+    const res = await fetchWithTimeout(`${API_BASE_URL}/api/applications/`, {
+      method: 'POST',
+      headers: jsonHeaders(),
+      body: JSON.stringify(data),
+    });
+    return handleResponse(res);
+  },
+
+  async updateApplication(appId: string, data: Partial<{ company: string; role: string; stage: string; date: string; notes: string; url: string; salary: string; location: string }>) {
+    const res = await fetchWithTimeout(`${API_BASE_URL}/api/applications/${appId}`, {
+      method: 'PUT',
+      headers: jsonHeaders(),
+      body: JSON.stringify(data),
+    });
+    return handleResponse(res);
+  },
+
+  async deleteApplication(appId: string) {
+    const res = await fetchWithTimeout(`${API_BASE_URL}/api/applications/${appId}`, {
+      method: 'DELETE',
+      headers: authHeaders(),
+    });
+    return handleResponse(res);
+  },
+
   // ============ COVER LETTERS ============
   async generateCoverLetter(evaluationId: string, hiringManagerName?: string, shortVersion?: boolean) {
     const res = await fetchWithTimeout(`${API_BASE_URL}/api/cover-letter/generate`, {

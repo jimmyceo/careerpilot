@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import Sidebar from '@/components/layout/Sidebar';
+import { apiClient } from '@/lib/api';
 import {
   ArrowRight,
   Plus,
@@ -40,11 +41,7 @@ const STAGES: { key: Stage; label: string; color: string }[] = [
 
 const STORAGE_KEY = 'hunt-x-applications';
 
-function generateId() {
-  return Math.random().toString(36).substring(2, 9);
-}
-
-function loadApps(): Application[] {
+function loadLocalApps(): Application[] {
   if (typeof window === 'undefined') return [];
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -54,7 +51,7 @@ function loadApps(): Application[] {
   }
 }
 
-function saveApps(apps: Application[]) {
+function saveLocalApps(apps: Application[]) {
   if (typeof window === 'undefined') return;
   localStorage.setItem(STORAGE_KEY, JSON.stringify(apps));
 }
@@ -64,46 +61,129 @@ export default function ApplicationsPage() {
   const [editing, setEditing] = useState<Application | null>(null);
   const [showAdd, setShowAdd] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  useEffect(() => {
-    setApps(loadApps());
-    setMounted(true);
+  const loadApps = useCallback(async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const data = await apiClient.listApplications();
+      if (data?.applications) {
+        const mapped = data.applications.map((a: any) => ({
+          id: a.id,
+          company: a.company,
+          role: a.role,
+          stage: a.stage as Stage,
+          date: a.date || '',
+          notes: a.notes || '',
+          url: a.url,
+          salary: a.salary,
+          location: a.location,
+        }));
+        setApps(mapped);
+        saveLocalApps(mapped);
+      }
+    } catch (err: any) {
+      setError(err?.message || 'Failed to load applications');
+      const local = loadLocalApps();
+      if (local.length) setApps(local);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   useEffect(() => {
-    if (mounted) saveApps(apps);
+    loadApps();
+    setMounted(true);
+  }, [loadApps]);
+
+  useEffect(() => {
+    if (mounted && apps.length) saveLocalApps(apps);
   }, [apps, mounted]);
 
-  const addApp = (app: Omit<Application, 'id'>) => {
-    setApps((prev) => [{ ...app, id: generateId() }, ...prev]);
+  const addApp = async (app: Omit<Application, 'id'>) => {
+    try {
+      const data = await apiClient.createApplication({
+        company: app.company,
+        role: app.role,
+        stage: app.stage,
+        date: app.date,
+        notes: app.notes,
+        url: app.url,
+        salary: app.salary,
+        location: app.location,
+      });
+      if (data?.application) {
+        const created: Application = {
+          id: data.application.id,
+          company: data.application.company,
+          role: data.application.role,
+          stage: data.application.stage as Stage,
+          date: data.application.date || '',
+          notes: data.application.notes || '',
+          url: data.application.url,
+          salary: data.application.salary,
+          location: data.application.location,
+        };
+        setApps((prev) => [created, ...prev]);
+      }
+    } catch (err: any) {
+      setError(err?.message || 'Failed to create application');
+    }
     setShowAdd(false);
   };
 
-  const updateApp = (id: string, updates: Partial<Application>) => {
-    setApps((prev) => prev.map((a) => (a.id === id ? { ...a, ...updates } : a)));
+  const updateApp = async (id: string, updates: Partial<Application>) => {
+    try {
+      const data = await apiClient.updateApplication(id, {
+        company: updates.company,
+        role: updates.role,
+        stage: updates.stage,
+        date: updates.date,
+        notes: updates.notes,
+        url: updates.url,
+        salary: updates.salary,
+        location: updates.location,
+      });
+      if (data?.application) {
+        setApps((prev) =>
+          prev.map((a) => (a.id === id ? { ...a, ...updates } : a))
+        );
+      }
+    } catch (err: any) {
+      setError(err?.message || 'Failed to update application');
+    }
     setEditing(null);
   };
 
-  const deleteApp = (id: string) => {
-    setApps((prev) => prev.filter((a) => a.id !== id));
+  const deleteApp = async (id: string) => {
+    try {
+      await apiClient.deleteApplication(id);
+      setApps((prev) => prev.filter((a) => a.id !== id));
+    } catch (err: any) {
+      setError(err?.message || 'Failed to delete application');
+    }
   };
 
-  const moveStage = (id: string, direction: 'left' | 'right') => {
+  const moveStage = async (id: string, direction: 'left' | 'right') => {
     const stageKeys = STAGES.map((s) => s.key);
-    setApps((prev) =>
-      prev.map((a) => {
-        if (a.id !== id) return a;
-        const idx = stageKeys.indexOf(a.stage);
-        const newIdx = direction === 'right' ? idx + 1 : idx - 1;
-        if (newIdx < 0 || newIdx >= stageKeys.length) return a;
-        return { ...a, stage: stageKeys[newIdx] };
-      })
-    );
+    const app = apps.find((a) => a.id === id);
+    if (!app) return;
+    const idx = stageKeys.indexOf(app.stage);
+    const newIdx = direction === 'right' ? idx + 1 : idx - 1;
+    if (newIdx < 0 || newIdx >= stageKeys.length) return;
+    const newStage = stageKeys[newIdx];
+    await updateApp(id, { stage: newStage });
   };
 
   const appsByStage = useCallback(() => {
     const grouped: Record<Stage, Application[]> = {
-      applied: [], phone: [], interview: [], offer: [], rejected: [],
+      applied: [],
+      phone: [],
+      interview: [],
+      offer: [],
+      rejected: [],
     };
     apps.forEach((a) => {
       if (grouped[a.stage]) grouped[a.stage].push(a);
@@ -150,6 +230,18 @@ export default function ApplicationsPage() {
             </div>
           </div>
 
+          {error && (
+            <div className="mb-4 px-4 py-3 bg-[#EF4444]/10 border border-[#EF4444]/25 rounded-lg text-sm text-[#EF4444]">
+              {error}
+              <button
+                onClick={() => setError('')}
+                className="ml-2 text-[#E8E8ED] hover:text-white underline"
+              >
+                Dismiss
+              </button>
+            </div>
+          )}
+
           {/* Stats */}
           <div className="grid grid-cols-4 gap-4 mb-6">
             <div className="p-4 bg-[#1A1A24] rounded-lg border border-white/[0.06]">
@@ -180,12 +272,7 @@ export default function ApplicationsPage() {
           </button>
 
           {/* Add Modal */}
-          {showAdd && (
-            <ApplicationForm
-              onSubmit={addApp}
-              onCancel={() => setShowAdd(false)}
-            />
-          )}
+          {showAdd && <ApplicationForm onSubmit={addApp} onCancel={() => setShowAdd(false)} />}
 
           {/* Edit Modal */}
           {editing && (
@@ -196,15 +283,19 @@ export default function ApplicationsPage() {
             />
           )}
 
+          {/* Loading */}
+          {loading && apps.length === 0 && (
+            <div className="flex items-center justify-center py-12">
+              <div className="w-6 h-6 border-2 border-[#3B82F6]/30 border-t-[#3B82F6] rounded-full animate-spin" />
+            </div>
+          )}
+
           {/* Kanban Board */}
           <div className="grid grid-cols-5 gap-3">
             {STAGES.map((stage) => (
               <div key={stage.key} className="flex flex-col">
                 <div className="flex items-center gap-2 mb-3 px-1">
-                  <div
-                    className="w-2.5 h-2.5 rounded-full"
-                    style={{ backgroundColor: stage.color }}
-                  />
+                  <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: stage.color }} />
                   <span className="text-xs font-medium text-[#8A8F98] uppercase tracking-wider">
                     {stage.label}
                   </span>
@@ -230,9 +321,7 @@ export default function ApplicationsPage() {
                           <Edit3 className="w-3 h-3" />
                         </button>
                       </div>
-                      {app.salary && (
-                        <p className="text-xs text-[#5A5E66] mt-1">{app.salary}</p>
-                      )}
+                      {app.salary && <p className="text-xs text-[#5A5E66] mt-1">{app.salary}</p>}
                       {app.notes && (
                         <p className="text-xs text-[#5A5E66] mt-1 line-clamp-2">{app.notes}</p>
                       )}

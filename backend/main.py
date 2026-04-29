@@ -34,6 +34,7 @@ from routers import (
 )
 from routers.payment_v2 import router as payment_v2_router
 from routers.feedback import router as feedback_router
+from routers.applications import router as applications_router
 
 # Create FastAPI app
 app = FastAPI(
@@ -70,6 +71,7 @@ app.include_router(jobs.router)
 app.include_router(subscriptions.router)
 app.include_router(payment_v2_router)
 app.include_router(feedback_router)
+app.include_router(applications_router)
 
 # Upload directories
 UPLOAD_DIR = Path(os.getenv("UPLOAD_DIR", "./uploads"))

@@ -14,6 +14,7 @@ from models.jobs import ScrapedJob, SavedJob
 from models.subscription import UserSubscription, SubscriptionPlan, SubscriptionEvent, CreditBalance, UsageLog
 
 from models.feedback import Feedback
+from models.application import Application
 
 __all__ = [
     "Base",
@@ -34,5 +35,6 @@ __all__ = [
     "SubscriptionEvent",
     "CreditBalance",
     "UsageLog",
-    "Feedback"
+    "Feedback",
+    "Application"
 ]
