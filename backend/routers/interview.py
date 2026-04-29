@@ -255,3 +255,21 @@ async def get_prep_by_evaluation(
         ],
         created_at=prep.created_at.isoformat()
     )
+
+
+@router.get("/")
+async def list_interview_preps(
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """List all interview preps for current user"""
+    preps = db.query(InterviewPrepModel).filter(InterviewPrepModel.user_id == user.id).order_by(InterviewPrepModel.created_at.desc()).all()
+    return [
+        {
+            "id": str(prep.id),
+            "evaluation_id": str(prep.evaluation_id) if prep.evaluation_id else None,
+            "created_at": prep.created_at.isoformat() if prep.created_at else None,
+        }
+        for prep in preps
+    ]
+

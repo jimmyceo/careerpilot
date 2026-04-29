@@ -323,6 +323,13 @@ export const apiClient = {
     return handleResponse(res);
   },
 
+  async listInterviewPreps() {
+    const res = await fetchWithTimeout(`${API_BASE_URL}/api/interview/`, {
+      headers: authHeaders(),
+    });
+    return handleResponse(res);
+  },
+
   // ============ COVER LETTERS ============
   async generateCoverLetter(evaluationId: string, hiringManagerName?: string, shortVersion?: boolean) {
     const res = await fetchWithTimeout(`${API_BASE_URL}/api/cover-letter/generate`, {

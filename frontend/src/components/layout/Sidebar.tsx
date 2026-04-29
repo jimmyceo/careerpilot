@@ -28,6 +28,7 @@ const navItems = [
   { label: 'Interview Prep', href: '/interview', icon: MessagesSquare },
   { label: 'AI Career Coach', href: '/chat', icon: Bot },
   { label: 'Application Tracker', href: '/applications', icon: Kanban },
+  { label: 'My Documents', href: '/documents', icon: FileText },
   { label: 'Settings', href: '/settings', icon: Settings },
 ];
 
