@@ -185,6 +185,60 @@ async def startup():
     Base.metadata.create_all(bind=engine)
     logger.info("Database initialized")
 
+    # Auto-migrate: add missing columns for PostgreSQL
+    _add_missing_columns()
+
+
+def _add_missing_columns():
+    """Add missing columns to existing tables (safe for production)."""
+    from sqlalchemy import inspect as sa_inspect, text
+    from sqlalchemy.exc import ProgrammingError
+
+    inspector = sa_inspect(engine)
+    dialect = engine.dialect.name
+
+    def column_exists(table: str, column: str) -> bool:
+        return column in {c["name"] for c in inspector.get_columns(table)}
+
+    def add_column(table: str, column: str, col_type: str):
+        if column_exists(table, column):
+            return
+        try:
+            with engine.connect() as conn:
+                if dialect == "postgresql":
+                    conn.execute(text(f'ALTER TABLE {table} ADD COLUMN IF NOT EXISTS {column} {col_type}'))
+                else:
+                    conn.execute(text(f'ALTER TABLE {table} ADD COLUMN {column} {col_type}'))
+                conn.commit()
+            logger.info(f"Added column {table}.{column}")
+        except Exception as e:
+            logger.warning(f"Could not add column {table}.{column}: {e}")
+
+    # users table migrations
+    add_column("users", "email_verified", "BOOLEAN DEFAULT FALSE")
+    add_column("users", "verification_code", "VARCHAR(10)")
+    add_column("users", "verification_expires", "TIMESTAMP WITH TIME ZONE")
+    add_column("users", "reset_token", "VARCHAR(255)")
+    add_column("users", "reset_token_expires", "TIMESTAMP WITH TIME ZONE")
+
+    # cover_letters table migrations (added later)
+    if "cover_letters" in inspector.get_table_names():
+        add_column("cover_letters", "evaluation_id", "VARCHAR(36)")
+
+    # cvs table migrations
+    if "cvs" in inspector.get_table_names():
+        add_column("cvs", "evaluation_id", "VARCHAR(36)")
+
+    # interview_preps table migrations
+    if "interview_preps" in inspector.get_table_names():
+        add_column("interview_preps", "evaluation_id", "VARCHAR(36)")
+
+    # resumes table migrations
+    if "resumes" in inspector.get_table_names():
+        add_column("resumes", "raw_text", "TEXT")
+
+    logger.info("Column migration completed")
+
 
 if __name__ == "__main__":
     import uvicorn
