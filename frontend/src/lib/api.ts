@@ -110,6 +110,15 @@ export const apiClient = {
     return handleResponse(res);
   },
 
+  async changePassword(currentPassword: string, newPassword: string) {
+    const res = await fetchWithTimeout(`${API_BASE_URL}/api/auth/change-password`, {
+      method: 'POST',
+      headers: jsonHeaders(),
+      body: JSON.stringify({ current_password: currentPassword, new_password: newPassword }),
+    });
+    return handleResponse(res);
+  },
+
   async resendVerification() {
     const res = await fetchWithTimeout(`${API_BASE_URL}/api/auth/resend-verification`, {
       method: 'POST',

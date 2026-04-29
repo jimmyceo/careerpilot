@@ -63,6 +63,11 @@ class ForgotPasswordRequest(BaseModel):
     email: EmailStr
 
 
+class ChangePasswordRequest(BaseModel):
+    current_password: str
+    new_password: str
+
+
 class ResetPasswordRequest(BaseModel):
     token: str
     new_password: str
@@ -316,6 +321,30 @@ async def reset_password(
     return PasswordResetResponse(
         success=True,
         message="Password has been reset successfully."
+    )
+
+
+@router.post("/change-password", response_model=PasswordResetResponse)
+async def change_password(
+    request: ChangePasswordRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Change password while logged in"""
+    if not verify_password(request.current_password, current_user.password_hash):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Current password is incorrect"
+        )
+
+    password_bytes = request.new_password.encode('utf-8')[:72]
+    truncated_password = password_bytes.decode('utf-8', errors='ignore')
+    current_user.password_hash = get_password_hash(truncated_password)
+    db.commit()
+
+    return PasswordResetResponse(
+        success=True,
+        message="Password updated successfully"
     )
 
 
