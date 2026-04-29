@@ -1,8 +1,8 @@
 """
-import logging
 Base model and database setup
 """
 
+import logging
 from datetime import datetime
 from typing import Optional
 from uuid import uuid4

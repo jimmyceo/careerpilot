@@ -1,7 +1,7 @@
 """
-import logging
 Email service with Resend primary and console fallback
 """
+import logging
 import os
 import requests
 from typing import Optional
