@@ -1,4 +1,5 @@
 """
+import logging
 Email service with Resend primary and console fallback
 """
 import os
@@ -17,12 +18,12 @@ class EmailService:
     def send_email(self, to: str, subject: str, html: str, text: Optional[str] = None) -> bool:
         """Send an email. Returns True if sent successfully."""
         if not self.enabled:
-            print(f"[EMAIL FALLBACK] To: {to}\nSubject: {subject}\n{'='*40}")
+            logging.getLogger("hunt-x").error(f"[EMAIL FALLBACK] To: {to}\nSubject: {subject}\n{'='*40}")
             if text:
-                print(text)
+                logging.getLogger("hunt-x").info(text)
             else:
-                print(html)
-            print('=' * 40)
+                logging.getLogger("hunt-x").info(html)
+            logging.getLogger("hunt-x").info('=' * 40)
             return True
 
         try:
@@ -41,7 +42,7 @@ class EmailService:
             res.raise_for_status()
             return True
         except Exception as e:
-            print(f"Email send failed: {e}")
+            logging.getLogger("hunt-x").error(f"Email send failed: {e}")
             return False
 
     def send_verification(self, to: str, code: str, name: Optional[str] = None) -> bool:

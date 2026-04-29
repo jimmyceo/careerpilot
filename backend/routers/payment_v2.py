@@ -1,4 +1,5 @@
 """
+import logging
 Unified Payment Router v2
 
 Refactored payment endpoints using the provider abstraction.
@@ -293,7 +294,7 @@ async def payment_webhook(
     except Exception as e:
         # Log error but return 200 to prevent retries
         # (Stripe will retry on 4xx/5xx)
-        print(f"Webhook error: {e}")
+        logging.getLogger("hunt-x").error(f"Webhook error: {e}")
         return {"status": "error", "message": str(e)}
 
 
@@ -318,7 +319,7 @@ async def handle_payment_event(db: Session, event: dict):
                 from payments import SubscriptionTier as TierEnum
                 sub_service.upgrade_subscription(user_id, TierEnum(tier))
             except Exception as e:
-                print(f"Failed to activate subscription: {e}")
+                logging.getLogger("hunt-x").error(f"Failed to activate subscription: {e}")
 
     elif event_type == "payment_succeeded":
         # Recurring payment succeeded

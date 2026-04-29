@@ -1,4 +1,5 @@
 """
+import logging
 API routes for subscription management
 """
 from fastapi import APIRouter, Depends, HTTPException, Request
@@ -278,7 +279,7 @@ async def stripe_webhook(
         raise HTTPException(status_code=400, detail="Invalid signature")
     except Exception as e:
         # Log error but return 200 to prevent Stripe retries
-        print(f"Webhook error: {e}")
+        logging.getLogger("hunt-x").error(f"Webhook error: {e}")
         return {"status": "error", "message": str(e)}
 
 

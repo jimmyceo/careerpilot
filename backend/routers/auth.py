@@ -2,6 +2,7 @@
 Authentication router
 """
 
+import logging
 from fastapi import APIRouter, Depends, HTTPException, status, Request
 from limiter import limiter
 from fastapi.security import HTTPBearer
@@ -139,7 +140,7 @@ async def register(
     except HTTPException:
         raise
     except Exception as e:
-        print(f"Registration error: {str(e)}")
+        logging.getLogger("hunt-x.auth").error(f"Registration error: {e}")
         import traceback
         traceback.print_exc()
         raise HTTPException(

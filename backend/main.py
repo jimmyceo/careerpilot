@@ -7,7 +7,18 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pathlib import Path
+from starlette.middleware.base import BaseHTTPMiddleware
+import time
+import logging
 import os
+
+# Logging setup
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s [%(levelname)s] %(name)s: %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S',
+)
+logger = logging.getLogger("hunt-x")
 
 # Load environment variables before other imports
 from dotenv import load_dotenv
@@ -69,6 +80,46 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Request logging middleware
+class RequestLoggingMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        start_time = time.time()
+        client_host = request.client.host if request.client else "unknown"
+
+        # Try to extract user_id from auth header for logging
+        user_id = None
+        auth_header = request.headers.get("authorization", "")
+        if auth_header.startswith("Bearer "):
+            from dependencies import decode_token
+            try:
+                token = auth_header.split(" ")[1]
+                payload = decode_token(token)
+                user_id = payload.get("sub") if payload else None
+            except Exception:
+                pass
+
+        try:
+            response = await call_next(request)
+            duration = (time.time() - start_time) * 1000
+            log_msg = (
+                f"{request.method} {request.url.path} "
+                f"{response.status_code} {duration:.1f}ms "
+                f"ip={client_host}"
+            )
+            if user_id:
+                log_msg += f" user={user_id}"
+            logger.info(log_msg)
+            return response
+        except Exception as exc:
+            duration = (time.time() - start_time) * 1000
+            logger.error(
+                f"{request.method} {request.url.path} "
+                f"ERROR {duration:.1f}ms ip={client_host} error={exc}"
+            )
+            raise
+
+app.add_middleware(RequestLoggingMiddleware)
+
 # Include routers
 app.include_router(auth.router)
 app.include_router(resumes.router)
@@ -117,7 +168,7 @@ async def startup():
     """Initialize database on startup"""
     # Create all tables
     Base.metadata.create_all(bind=engine)
-    print("✓ Database initialized")
+    logger.info("Database initialized")
 
 
 if __name__ == "__main__":

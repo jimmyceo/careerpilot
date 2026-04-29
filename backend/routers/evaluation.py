@@ -1,4 +1,5 @@
 """
+import logging
 Evaluation router
 """
 
@@ -486,6 +487,6 @@ def _decrement_job_counter(user_id: str):
             db.commit()
     except Exception as e:
         db.rollback()
-        print(f"Error decrementing job counter: {e}")
+        logging.getLogger("hunt-x").error(f"Error decrementing job counter: {e}")
     finally:
         db.close()

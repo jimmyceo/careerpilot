@@ -1,4 +1,5 @@
 """
+import logging
 Resume router
 """
 
@@ -122,7 +123,7 @@ async def upload_resume(
         )
         pdf_path = pdf_result.pdf_path
     except Exception as e:
-        print(f"PDF generation failed: {e}")
+        logging.getLogger("hunt-x").error(f"PDF generation failed: {e}")
         pdf_path = None
 
     # Create resume record
@@ -285,7 +286,7 @@ async def delete_resume(
         if resume.pdf_path:
             Path(resume.pdf_path).unlink(missing_ok=True)
     except Exception as e:
-        print(f"Error deleting files: {e}")
+        logging.getLogger("hunt-x").error(f"Error deleting files: {e}")
 
     db.delete(resume)
     db.commit()

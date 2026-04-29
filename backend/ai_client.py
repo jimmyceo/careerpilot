@@ -319,7 +319,7 @@ def kimi_query(prompt: str, system: str = "You are a helpful assistant.") -> str
 
 def notify(message: str):
     """Notification stub - could integrate with Telegram later"""
-    print(f"[NOTIFY] {message}")
+    logging.getLogger("hunt-x.ai").info(f"[NOTIFY] {message}")
 
 
 # Module-level convenience function

@@ -165,7 +165,7 @@ class JobScraperService:
                 )
 
         except Exception as e:
-            print(f"Error scraping {portal_name}: {e}")
+            logging.getLogger("hunt-x").error(f"Error scraping {portal_name}: {e}")
 
         # Rate limiting
         await asyncio.sleep(1 / config['rate_limit'])

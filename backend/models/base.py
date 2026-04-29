@@ -1,4 +1,5 @@
 """
+import logging
 Base model and database setup
 """
 
@@ -24,7 +25,7 @@ else:
     if 'supabase' in DATABASE_URL and 'sslmode' not in DATABASE_URL:
         DATABASE_URL = DATABASE_URL + "?sslmode=require"
 
-print(f"Using database: {DATABASE_URL[:50]}...")
+logging.getLogger("hunt-x").error(f"Using database: {DATABASE_URL[:50]}...")
 
 # Configure engine based on database type
 if DATABASE_URL.startswith('sqlite'):
