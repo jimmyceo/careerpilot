@@ -8,13 +8,17 @@ from sqlalchemy.orm import Session
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 import os
-import hashlib
-import base64
+import secrets
 
 from models import get_db, User
 
-# Security setup
-SECRET_KEY = os.getenv("JWT_SECRET", "your-secret-key-change-this-in-production")
+# Security setup — fail closed in production; random dev fallback
+_secret_env = os.getenv("JWT_SECRET")
+if not _secret_env:
+    if os.getenv("ENVIRONMENT", "").lower() == "production":
+        raise RuntimeError("JWT_SECRET environment variable is required in production")
+    _secret_env = secrets.token_hex(32)
+SECRET_KEY = _secret_env
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24  # 24 hours
 
