@@ -13,6 +13,8 @@ from models.chat import ChatSession, ChatMessage
 from models.jobs import ScrapedJob, SavedJob
 from models.subscription import UserSubscription, SubscriptionPlan, SubscriptionEvent, CreditBalance, UsageLog
 
+from models.feedback import Feedback
+
 __all__ = [
     "Base",
     "get_db",
@@ -31,5 +33,6 @@ __all__ = [
     "SubscriptionPlan",
     "SubscriptionEvent",
     "CreditBalance",
-    "UsageLog"
+    "UsageLog",
+    "Feedback"
 ]

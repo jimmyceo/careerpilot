@@ -15,6 +15,7 @@ import {
 } from 'lucide-react'
 
 import { Metadata } from 'next'
+import FeedbackSection from '@/components/landing/FeedbackSection'
 
 export const metadata: Metadata = {
   title: 'Hunt-X — Autonomous AI Career Agent',
@@ -170,19 +171,84 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Job Evaluation Showcase */}
+      <section className="py-24 bg-[#12121A] border-y border-white/[0.06]">
+        <div className="max-w-[1200px] mx-auto px-4">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <div>
+              <span className="text-xs text-[#5A5E66] uppercase tracking-wider">Evaluation</span>
+              <h2 className="text-3xl md:text-4xl font-medium mt-3 mb-4" style={{ letterSpacing: '-0.8px', lineHeight: 1.1 }}>
+                AI-Powered Job Match Analysis
+              </h2>
+              <p className="text-[#8A8F98] mb-6 leading-relaxed">
+                Upload your resume and a job description. Hunt-X evaluates your fit in seconds — highlighting skill gaps, keyword matches, and ATS compatibility.
+              </p>
+              <ul className="space-y-3 text-sm text-[#8A8F98]">
+                <li className="flex items-center gap-2">
+                  <Zap className="w-4 h-4 text-[#00D26A] shrink-0" />
+                  Match score from 0-100%
+                </li>
+                <li className="flex items-center gap-2">
+                  <Zap className="w-4 h-4 text-[#00D26A] shrink-0" />
+                  Identifies missing skills and keywords
+                </li>
+                <li className="flex items-center gap-2">
+                  <Zap className="w-4 h-4 text-[#00D26A] shrink-0" />
+                  Suggests specific improvements
+                </li>
+              </ul>
+            </div>
+            <div className="relative">
+              <div className="absolute -inset-4 bg-[#3B82F6]/[0.05] rounded-xl blur-[60px]" />
+              <div className="relative bg-[#1A1A24] rounded-lg border border-white/[0.06] p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <p className="text-sm text-[#5A5E66] mb-1">Match Score</p>
+                    <p className="text-4xl font-medium text-[#00D26A]" style={{ textShadow: '0 0 20px rgba(0,210,106,0.3)' }}>87%</p>
+                  </div>
+                  <div className="px-3 py-1 rounded-full bg-[#00D26A]/[0.12] border border-[#00D26A]/[0.25] text-[#00D26A] text-xs font-medium">
+                    High Fit
+                  </div>
+                </div>
+                <div className="space-y-3 mb-6">
+                  {[
+                    { skill: 'React / Next.js', status: 'match' },
+                    { skill: 'TypeScript', status: 'match' },
+                    { skill: 'GraphQL', status: 'gap' },
+                    { skill: 'AWS Lambda', status: 'gap' },
+                    { skill: 'System Design', status: 'match' },
+                  ].map((item) => (
+                    <div key={item.skill} className="flex items-center justify-between text-sm">
+                      <span className="text-[#E8E8ED]">{item.skill}</span>
+                      <span className={item.status === 'match' ? 'text-[#00D26A] text-xs' : 'text-[#F59E0B] text-xs'}>
+                        {item.status === 'match' ? 'Matched' : 'Gap'}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+                <div className="border-t border-white/[0.06] pt-4">
+                  <p className="text-xs text-[#5A5E66] mb-2">AI Suggestion</p>
+                  <p className="text-sm text-[#8A8F98]">Add GraphQL experience and AWS certification to boost match to 94%</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* How It Works */}
-      <section id="how-it-works" className="py-24 bg-[#12121A] border-y border-white/[0.06]">
+      <section id="how-it-works" className="py-24 bg-[#0B0B0F]">
         <div className="max-w-[1200px] mx-auto px-4 text-center">
           <span className="text-xs text-[#5A5E66] uppercase tracking-wider">Process</span>
           <h2 className="text-3xl md:text-4xl font-medium mt-3 mb-16" style={{ letterSpacing: '-0.8px', lineHeight: 1.1 }}>
-            How Hunt-X Works
+            Three Steps to Your Next Offer
           </h2>
           <div className="grid md:grid-cols-3 gap-8 relative">
             <div className="hidden md:block absolute top-12 left-[16.67%] right-[16.67%] h-px border-t border-dashed border-white/[0.08]" />
             {[
-              { step: '1', title: 'Upload', desc: 'Upload your resume in PDF, DOCX, or TXT format.' },
-              { step: '2', title: 'Analyze', desc: 'Our AI analyzes your skills, experience, and gaps.' },
-              { step: '3', title: 'Apply & Track', desc: 'Generate tailored CVs and track applications.' },
+              { step: '1', title: 'Upload', desc: 'Upload your resume and target job description.' },
+              { step: '2', title: 'Evaluate', desc: 'AI analyzes your fit, gaps, and ATS compatibility.' },
+              { step: '3', title: 'Generate', desc: 'Get a tailored CV, cover letter, and interview prep.' },
             ].map((item) => (
               <div key={item.step} className="relative">
                 <div className="w-12 h-12 mx-auto mb-4 rounded-full border border-dashed border-[#3B82F6]/40 flex items-center justify-center text-[#3B82F6] font-medium text-lg bg-[#0B0B0F]">
@@ -320,6 +386,11 @@ export default function Home() {
             ))}
           </div>
         </div>
+      </section>
+
+      {/* Feedback */}
+      <section className="py-24 bg-[#12121A] border-t border-white/[0.06]">
+        <FeedbackSection />
       </section>
 
       {/* CTA */}

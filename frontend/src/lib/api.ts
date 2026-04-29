@@ -405,6 +405,21 @@ export const apiClient = {
     return handleResponse(res);
   },
 
+  // ============ FEEDBACK ============
+  async submitFeedback(rating: number, text?: string, reviewerName?: string, reviewerRole?: string) {
+    const res = await fetchWithTimeout(`${API_BASE_URL}/api/feedback/`, {
+      method: 'POST',
+      headers: jsonHeaders(),
+      body: JSON.stringify({ rating, text, reviewer_name: reviewerName, reviewer_role: reviewerRole }),
+    });
+    return handleResponse(res);
+  },
+
+  async getApprovedFeedback(limit: number = 10) {
+    const res = await fetchWithTimeout(`${API_BASE_URL}/api/feedback/approved?limit=${limit}`);
+    return handleResponse(res);
+  },
+
   // ============ LEGACY COMPATIBILITY ============
   async checkPaymentStatus(email: string) {
     const res = await fetchWithTimeout(`${API_BASE_URL}/api/payment/v2/status/${email}`, {
