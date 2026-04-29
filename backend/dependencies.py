@@ -36,11 +36,12 @@ def get_password_hash(password: str) -> str:
     return pwd_context.hash(truncated)
 
 
-def create_access_token(data: dict) -> str:
+def create_access_token(data: dict, remember_me: bool = False) -> str:
     """Create JWT access token"""
     from datetime import datetime, timedelta
     to_encode = data.copy()
-    expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    minutes = ACCESS_TOKEN_EXPIRE_MINUTES * 30 if remember_me else ACCESS_TOKEN_EXPIRE_MINUTES
+    expire = datetime.utcnow() + timedelta(minutes=minutes)
     to_encode.update({"exp": expire})
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 

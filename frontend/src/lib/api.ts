@@ -83,11 +83,11 @@ export const apiClient = {
     return data;
   },
 
-  async login(email: string, password: string) {
+  async login(email: string, password: string, rememberMe: boolean = false) {
     const res = await fetchWithTimeout(`${API_BASE_URL}/api/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ email, password, remember_me: rememberMe }),
     });
     const data = await handleResponse(res);
     if (data.access_token) setAuthToken(data.access_token);

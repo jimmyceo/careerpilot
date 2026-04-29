@@ -31,6 +31,7 @@ class UserRegister(BaseModel):
 class UserLogin(BaseModel):
     email: EmailStr
     password: str
+    remember_me: bool = False
 
 
 class UserResponse(BaseModel):
@@ -128,17 +129,15 @@ async def login(
             detail="Incorrect email or password"
         )
 
-    # Verify password - truncate to 72 bytes for bcrypt
-    password_bytes = credentials.password.encode('utf-8')[:72]
-    truncated_password = password_bytes.decode('utf-8', errors='ignore')
-    if not verify_password(truncated_password, user.password_hash):
+    # Verify password
+    if not verify_password(credentials.password, user.password_hash):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect email or password"
         )
 
-    # Create token
-    token = create_access_token({"sub": str(user.id)})
+    # Create token (30 days if remember me)
+    token = create_access_token({"sub": str(user.id)}, remember_me=credentials.remember_me)
 
     return TokenResponse(
         access_token=token,

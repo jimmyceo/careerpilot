@@ -26,6 +26,7 @@ export default function AuthPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [touched, setTouched] = useState<Record<string, boolean>>({});
+  const [rememberMe, setRememberMe] = useState(false);
 
   const strength = useMemo(() => getPasswordStrength(password), [password]);
 
@@ -54,7 +55,7 @@ export default function AuthPage() {
     try {
       let data;
       if (isLogin) {
-        data = await apiClient.login(email, password);
+        data = await apiClient.login(email, password, rememberMe);
       } else {
         data = await apiClient.register(email, password, name);
       }
@@ -225,6 +226,19 @@ export default function AuthPage() {
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
                 </div>
+
+                {/* Remember Me */}
+                {isLogin && (
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={rememberMe}
+                      onChange={(e) => setRememberMe(e.target.checked)}
+                      className="w-4 h-4 rounded border-white/[0.08] bg-white/[0.02] text-[#3B82F6] focus:ring-[#3B82F6]/20"
+                    />
+                    <span className="text-sm text-[#8A8F98]">Remember me for 30 days</span>
+                  </label>
+                )}
 
                 {/* Password Strength */}
                 {!isLogin && password.length > 0 && (
