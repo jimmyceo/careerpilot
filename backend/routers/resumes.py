@@ -1,7 +1,7 @@
 """
-import logging
 Resume router
 """
+import logging
 
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
 from pydantic import BaseModel, EmailStr
