@@ -21,9 +21,13 @@ DATABASE_URL = os.getenv('DATABASE_URL', 'sqlite:///./hunt_x.db')
 if not DATABASE_URL or DATABASE_URL.startswith('sqlite'):
     DATABASE_URL = 'sqlite:///./hunt_x.db'
 else:
+    # Use pg8000 driver explicitly
+    if DATABASE_URL.startswith('postgresql://'):
+        DATABASE_URL = DATABASE_URL.replace('postgresql://', 'postgresql+pg8000://', 1)
     # Add SSL mode for Supabase connections if not present
     if 'supabase' in DATABASE_URL and 'sslmode' not in DATABASE_URL:
-        DATABASE_URL = DATABASE_URL + "?sslmode=require"
+        separator = "&" if "?" in DATABASE_URL else "?"
+        DATABASE_URL = DATABASE_URL + f"{separator}sslmode=require"
 
 logging.getLogger("hunt-x").error(f"Using database: {DATABASE_URL[:50]}...")
 
