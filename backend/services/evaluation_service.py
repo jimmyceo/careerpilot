@@ -286,9 +286,18 @@ class EvaluationService:
             )
             for s in block_f_data.get("star_stories", [])
         ]
+        # Coerce red_flags strings to dicts
+        raw_red_flags = block_f_data.get("red_flags", [])
+        red_flags = []
+        for rf in raw_red_flags:
+            if isinstance(rf, dict):
+                red_flags.append(rf)
+            elif isinstance(rf, str):
+                red_flags.append({"description": rf})
+
         block_f = BlockF(
             star_stories=star_stories,
-            red_flags=block_f_data.get("red_flags", []),
+            red_flags=red_flags,
             case_study=block_f_data.get("case_study", ""),
             questions_to_ask=block_f_data.get("questions_to_ask", [])
         )
