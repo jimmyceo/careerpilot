@@ -21,7 +21,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Model configuration
-PRIMARY_MODEL = "claude-haiku-4-5"
+PRIMARY_MODEL = "claude-3-5-haiku-20241022"
 FALLBACK_MODEL = "gpt-4o-mini"
 
 # API Configuration
@@ -110,11 +110,17 @@ async def _call_anthropic(
         )
 
         if response.status_code != 200:
-            error_msg = f"Anthropic API Error: {response.status_code} - {response.text}"
-            raise AnthropicError(error_msg)
+            logger.error(f"[AI] Anthropic HTTP {response.status_code}: {response.text[:500]}")
+            raise AnthropicError(f"Anthropic API Error: {response.status_code} - {response.text[:200]}")
 
         result = response.json()
-        content = result.get("content", [{}])[0].get("text", "")
+        content_blocks = result.get("content", [])
+        if not content_blocks:
+            logger.error(f"[AI] Anthropic empty content blocks: {result}")
+            raise AnthropicError("Anthropic returned empty content blocks")
+        content = content_blocks[0].get("text", "")
+        if not content:
+            logger.error(f"[AI] Anthropic empty text in content block: {result}")
         usage = result.get("usage", {})
         input_tokens = usage.get("input_tokens", 0)
         output_tokens = usage.get("output_tokens", 0)
