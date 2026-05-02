@@ -170,6 +170,7 @@ export const apiClient = {
 
   // ============ EVALUATION ============
   async createEvaluation(resumeId: string, jobDescription: string, company: string, jobTitle: string, jobUrl?: string) {
+    // Evaluation can take 20-45s due to AI processing
     const res = await fetchWithTimeout(`${API_BASE_URL}/api/evaluate/`, {
       method: 'POST',
       headers: jsonHeaders(),
@@ -180,7 +181,7 @@ export const apiClient = {
         job_title: jobTitle,
         job_url: jobUrl,
       }),
-    });
+    }, 60000);
     return handleResponse(res);
   },
 

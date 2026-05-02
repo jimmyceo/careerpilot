@@ -8,7 +8,7 @@ Task #40: Flipped AI model priority
 """
 
 import os
-import requests
+import httpx
 import logging
 from datetime import datetime
 from typing import Dict, List, Optional, Tuple, Any
@@ -37,6 +37,9 @@ _model_usage_stats: Dict[str, Dict[str, Any]] = {
     PRIMARY_MODEL: {"count": 0, "input_tokens": 0, "output_tokens": 0, "errors": 0},
     FALLBACK_MODEL: {"count": 0, "input_tokens": 0, "output_tokens": 0, "errors": 0},
 }
+
+# Reusable async client
+_async_client = httpx.AsyncClient(timeout=httpx.Timeout(120.0, connect=10.0))
 
 
 class AnthropicError(Exception):
@@ -75,7 +78,7 @@ def _log_model_usage(
             _model_usage_stats[model_name]["errors"] += 1
 
 
-def _call_anthropic(
+async def _call_anthropic(
     prompt: str,
     system: str = "You are a helpful assistant.",
     user_id: str = "anonymous",
@@ -100,11 +103,10 @@ def _call_anthropic(
             "messages": [{"role": "user", "content": prompt}]
         }
 
-        response = requests.post(
+        response = await _async_client.post(
             f"{ANTHROPIC_BASE_URL}/messages",
             headers=headers,
-            json=data,
-            timeout=120
+            json=data
         )
 
         if response.status_code != 200:
@@ -120,13 +122,13 @@ def _call_anthropic(
         _log_model_usage(PRIMARY_MODEL, input_tokens, output_tokens, user_id, "success")
         return content, input_tokens, output_tokens
 
-    except requests.RequestException as e:
+    except httpx.RequestError as e:
         raise AnthropicError(f"Anthropic request failed: {str(e)}")
     except Exception as e:
         raise AnthropicError(f"Anthropic error: {str(e)}")
 
 
-def _call_openai(
+async def _call_openai(
     prompt: str,
     system: str = "You are a helpful assistant.",
     user_id: str = "anonymous",
@@ -152,11 +154,10 @@ def _call_openai(
             "max_tokens": max_tokens
         }
 
-        response = requests.post(
+        response = await _async_client.post(
             f"{OPENAI_BASE_URL}/chat/completions",
             headers=headers,
-            json=data,
-            timeout=120
+            json=data
         )
 
         if response.status_code != 200:
@@ -172,13 +173,13 @@ def _call_openai(
         _log_model_usage(FALLBACK_MODEL, input_tokens, output_tokens, user_id, "success")
         return content, input_tokens, output_tokens
 
-    except requests.RequestException as e:
+    except httpx.RequestError as e:
         raise OpenAIError(f"OpenAI request failed: {str(e)}")
     except Exception as e:
         raise OpenAIError(f"OpenAI error: {str(e)}")
 
 
-def ai_query(
+async def ai_query(
     prompt: str,
     system: str = "You are a helpful assistant.",
     user_id: str = "anonymous",
@@ -206,7 +207,7 @@ def ai_query(
     if not force_fallback:
         try:
             logger.info(f"[AI] Attempting primary model: {PRIMARY_MODEL}")
-            content, input_tokens, output_tokens = _call_anthropic(
+            content, input_tokens, output_tokens = await _call_anthropic(
                 prompt, system, user_id, max_tokens
             )
             return content
@@ -218,7 +219,7 @@ def ai_query(
     # FALLBACK model (on AnthropicError or if force_fallback)
     try:
         logger.info(f"[AI] Using fallback model: {FALLBACK_MODEL}")
-        content, input_tokens, output_tokens = _call_openai(
+        content, input_tokens, output_tokens = await _call_openai(
             prompt, system, user_id, max_tokens
         )
         return content
@@ -228,7 +229,7 @@ def ai_query(
         return f"AI Service Error: Both primary and fallback models failed. {e}"
 
 
-def ai_query_json(
+async def ai_query_json(
     prompt: str,
     system: str = "You are a helpful assistant. Respond with valid JSON only.",
     user_id: str = "anonymous",
@@ -243,7 +244,7 @@ def ai_query_json(
     """
     import json
 
-    response = ai_query(prompt, system, user_id, max_tokens)
+    response = await ai_query(prompt, system, user_id, max_tokens)
 
     try:
         return json.loads(response)
@@ -283,7 +284,7 @@ def reset_model_usage_stats() -> None:
 
 
 # Legacy function - kept for backward compatibility
-def kimi_query(prompt: str, system: str = "You are a helpful assistant.") -> str:
+async def kimi_query(prompt: str, system: str = "You are a helpful assistant.") -> str:
     """Query Ollama/Kimi API for AI responses (legacy support)"""
     try:
         headers = {
@@ -300,11 +301,10 @@ def kimi_query(prompt: str, system: str = "You are a helpful assistant.") -> str
             'stream': False
         }
 
-        response = requests.post(
+        response = await _async_client.post(
             f'{OLLAMA_BASE_URL}/chat/completions',
             headers=headers,
-            json=data,
-            timeout=120
+            json=data
         )
 
         if response.status_code == 200:
@@ -336,7 +336,7 @@ class AIClient:
         """Initialize AI client"""
         pass
 
-    def query(
+    async def query(
         self,
         prompt: str,
         system: str = "You are a helpful assistant.",
@@ -355,9 +355,9 @@ class AIClient:
         Returns:
             AI response content
         """
-        return ai_query(prompt, system, user_id, max_tokens)
+        return await ai_query(prompt, system, user_id, max_tokens)
 
-    def query_json(
+    async def query_json(
         self,
         prompt: str,
         system: str = "You are a helpful assistant. Respond with valid JSON only.",
@@ -370,7 +370,7 @@ class AIClient:
         Returns:
             Parsed JSON dict or error dict
         """
-        return ai_query_json(prompt, system, user_id, max_tokens)
+        return await ai_query_json(prompt, system, user_id, max_tokens)
 
     # Aliases for backward compatibility with services using generate/generate_json
     generate = query
